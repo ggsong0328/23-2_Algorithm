@@ -1,43 +1,46 @@
-import sys,math
-input = sys.stdin.readline
-sys.setrecursionlimit(10**6)
+from collections import deque
 
-n,m,k,x = map(int,input().split())
+N = int(input())
+water = [list(map(int, input().split())) for _ in range(N)]
 
-graph = [[] for b in range(n+1)]
-visited = [False for b in range(n+1)]
-way = [math.inf for b in range(n+1)]
+shark_size = 2
+shark_eat = 0
+for i in range(N):
+    for j in range(N):
+        if water[i][j] == 9:
+            shark_pos = (i, j)
+            water[i][j] = 0 
 
-for _ in range(m):
-    a,b = map(int,input().split())
-    graph[a].append(b)
+dx = [-1, 1, 0, 0]
+dy = [0, 0, -1, 1]
 
-for i in graph[x]:
-    way[i] = 1
+def bfs(x, y):
+    visited = [[False]*N for _ in range(N)]
+    queue = deque([(0, x, y)])
+    visited[x][y] = True
+    while queue:
+        time, x, y = queue.popleft()
+        if 0 < water[x][y] < shark_size:  
+            water[x][y] = 0 
+            return time, x, y  
+        for i in range(4):
+            nx = x + dx[i]
+            ny = y + dy[i]
+            if 0 <= nx < N and 0 <= ny < N and not visited[nx][ny] and shark_size >= water[nx][ny]:
+                visited[nx][ny] = True
+                queue.append((time+1, nx, ny)) 
+    return -1, x, y  
 
-cnt = 0
-def DFS(a):
-    global cnt
-    cnt += 1
-    visited[a] = True
+time = 0
+while True:
+    t, x, y = bfs(*shark_pos)
+    if t == -1:  
+        break
+    time += t
+    shark_eat += 1
+    if shark_eat == shark_size: 
+        shark_size += 1
+        shark_eat = 0
+    shark_pos = (x, y)
 
-    for i in graph[a]:  
-        if visited[i] == False :
-            
-            way[i] = min(way[i], cnt)
-            DFS(i)     
-
-    cnt -=1
-
-DFS(x)
-flag = False
-
-#print(way)
-
-for w in range(len(way)):
-    if way[w] == k:
-        print(w)
-        flag = True
-
-if not flag:
-    print(-1)
+print(time)
