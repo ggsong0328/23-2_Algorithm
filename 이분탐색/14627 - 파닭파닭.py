@@ -1,3 +1,4 @@
+#혼자서 못풀어씀
 import sys
 
 input = sys.stdin.readline
